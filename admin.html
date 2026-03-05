@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin · Novo Horizonte</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde: #00a651;
+    --amarelo: #ffd700;
+    --vermelho: #e63946;
+    --azul: #1d3557;
+    --cinza: #f4f1e8;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--azul);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .card {
+    background: white;
+    border-radius: 24px;
+    padding: 40px 32px;
+    width: min(400px, 100%);
+    text-align: center;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.4);
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 2rem;
+    color: var(--azul);
+    letter-spacing: 3px;
+    margin-bottom: 4px;
+  }
+
+  .subtitle {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: #aaa;
+    margin-bottom: 32px;
+  }
+
+  /* LOGIN */
+  #loginSection input {
+    width: 100%;
+    padding: 14px 18px;
+    border: 2px solid #ddd;
+    border-radius: 12px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.2rem;
+    text-align: center;
+    letter-spacing: 6px;
+    outline: none;
+    margin-bottom: 14px;
+    transition: border 0.2s;
+  }
+
+  #loginSection input:focus { border-color: var(--verde); }
+
+  #loginSection button {
+    width: 100%;
+    background: var(--azul);
+    color: white;
+    border: none;
+    padding: 16px;
+    border-radius: 12px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    font-weight: 900;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: background 0.2s;
+  }
+
+  #loginSection button:hover { background: var(--verde); }
+
+  .login-error {
+    color: var(--vermelho);
+    font-size: 0.82rem;
+    margin-top: 10px;
+    display: none;
+  }
+
+  /* ADMIN PANEL */
+  #adminSection { display: none; }
+
+  .status-box {
+    background: var(--cinza);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+
+  .status-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #aaa;
+    margin-bottom: 8px;
+  }
+
+  .status-value {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 1.6rem;
+    letter-spacing: 2px;
+  }
+
+  .status-waiting { color: #f4a261; }
+  .status-clear { color: var(--verde); }
+
+  .pulse-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    background: #f4a261;
+    border-radius: 50%;
+    margin-right: 8px;
+    animation: blink 1.2s ease-in-out infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.3; transform: scale(0.7); }
+  }
+
+  .confirm-btn {
+    width: 100%;
+    background: var(--verde);
+    color: white;
+    border: none;
+    padding: 20px;
+    border-radius: 16px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 900;
+    cursor: pointer;
+    letter-spacing: 1px;
+    box-shadow: 0 8px 24px rgba(0,166,81,0.4);
+    transition: all 0.2s;
+    margin-bottom: 12px;
+  }
+
+  .confirm-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0,166,81,0.5); }
+  .confirm-btn:disabled { background: #ccc; box-shadow: none; cursor: not-allowed; transform: none; }
+
+  .confirmed-msg {
+    display: none;
+    background: #e8f8f0;
+    border: 2px solid var(--verde);
+    border-radius: 12px;
+    padding: 16px;
+    color: var(--verde);
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-top: 12px;
+  }
+
+  .logout-btn {
+    background: none;
+    border: none;
+    color: #bbb;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 20px;
+    font-family: 'Nunito', sans-serif;
+  }
+
+  .pending-list {
+    text-align: left;
+    margin-bottom: 20px;
+  }
+
+  .pending-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: white;
+    border: 2px solid #eee;
+    border-radius: 12px;
+    margin-bottom: 10px;
+  }
+
+  .pending-item .pname { font-weight: 700; font-size: 0.9rem; color: var(--azul); }
+  .pending-item .pqty { font-size: 0.8rem; color: #888; }
+  .pending-item .pprice { font-family: 'Bebas Neue', cursive; font-size: 1.2rem; color: var(--vermelho); }
+</style>
+
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+  import { getDatabase, ref, set, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBKkHx7H1OBD_k8jzrHWEZk",
+    authDomain: "mercado-1123b.firebaseapp.com",
+    databaseURL: "https://mercado-1123b-default-rtdb.firebaseio.com",
+    projectId: "mercado-1123b",
+    storageBucket: "mercado-1123b.firebasestorage.app",
+    messagingSenderId: "663931630540",
+    appId: "1:663931630540:web:da8dc3d57a"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  window.fbSet = (path, value) => set(ref(db, path), value);
+  window.fbListen = (path, cb) => onValue(ref(db, path), snap => cb(snap.val()));
+</script>
+</head>
+<body>
+
+<div class="card">
+  <div class="logo">Novo Horizonte</div>
+  <div class="subtitle">Painel do Administrador</div>
+
+  <!-- LOGIN -->
+  <div id="loginSection">
+    <p style="color:#666;font-size:0.9rem;margin-bottom:20px;">Digite o código de acesso para entrar</p>
+    <input type="password" id="loginInput" placeholder="· · · ·" maxlength="6"
+      onkeydown="if(event.key==='Enter') doLogin()">
+    <button onclick="doLogin()">ENTRAR</button>
+    <div class="login-error" id="loginError">Código incorreto. Tente novamente.</div>
+  </div>
+
+  <!-- ADMIN PANEL -->
+  <div id="adminSection">
+    <div class="status-box">
+      <div class="status-label">Status do pagamento</div>
+      <div class="status-value status-waiting" id="statusValue">
+        <span class="pulse-dot"></span>Aguardando...
+      </div>
+    </div>
+
+    <div id="pendingOrders" class="pending-list" style="display:none;"></div>
+
+    <button class="confirm-btn" id="confirmBtn" onclick="confirmPayment()">
+      ✅ CONFIRMAR PAGAMENTO
+    </button>
+
+    <div class="confirmed-msg" id="confirmedMsg">
+      ✅ Pagamento confirmado! A tela do cliente foi liberada.
+    </div>
+
+    <button class="logout-btn" onclick="doLogout()">⟵ Sair</button>
+  </div>
+</div>
+
+<script>
+const ADMIN_CODE = '0407';
+
+function doLogin() {
+  const val = document.getElementById('loginInput').value;
+  if (val === ADMIN_CODE) {
+    document.getElementById('loginSection').style.display = 'none';
+    document.getElementById('adminSection').style.display = 'block';
+    startAdminPolling();
+  } else {
+    const err = document.getElementById('loginError');
+    err.style.display = 'block';
+    document.getElementById('loginInput').value = '';
+    setTimeout(() => { err.style.display = 'none'; }, 2000);
+  }
+}
+
+function doLogout() {
+  stopAdminPolling();
+  document.getElementById('loginSection').style.display = 'block';
+  document.getElementById('adminSection').style.display = 'none';
+  document.getElementById('loginInput').value = '';
+  document.getElementById('confirmedMsg').style.display = 'none';
+  document.getElementById('confirmBtn').disabled = false;
+}
+
+let adminPoll = null;
+
+function startAdminPolling() {
+  checkPendingOrder();
+}
+
+function stopAdminPolling() {}
+
+function checkPendingOrder() {
+  window.fbListen('pending_order', (val) => {
+    if (val && val !== 'none') {
+      try { showPendingOrder(JSON.parse(val)); } catch(e) { hidePendingOrder(); }
+    } else {
+      hidePendingOrder();
+    }
+  });
+
+}
+
+function showPendingOrder(order) {
+  const statusEl = document.getElementById('statusValue');
+  statusEl.className = 'status-value status-waiting';
+  statusEl.innerHTML = '<span class="pulse-dot"></span>Pagamento Pendente';
+
+  const pendingEl = document.getElementById('pendingOrders');
+  pendingEl.style.display = 'block';
+  pendingEl.innerHTML = `
+    <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:2px;color:#aaa;margin-bottom:8px;">Pedido recebido</div>
+    ${order.items.map(i => `
+      <div class="pending-item">
+        <div>
+          <div class="pname">${i.name}</div>
+          <div class="pqty">x${i.qty}</div>
+        </div>
+        <div class="pprice">R$ ${(parseFloat(i.price.replace(',','.')) * i.qty).toFixed(2).replace('.',',')}</div>
+      </div>`).join('')}
+    <div style="text-align:right;margin-top:6px;">
+      <span style="font-size:0.8rem;color:#aaa;">TOTAL </span>
+      <span style="font-family:'Bebas Neue',cursive;font-size:1.6rem;color:var(--azul);">R$ ${order.total}</span>
+    </div>
+  `;
+  document.getElementById('confirmBtn').disabled = false;
+  document.getElementById('confirmedMsg').style.display = 'none';
+}
+
+function hidePendingOrder() {
+  const statusEl = document.getElementById('statusValue');
+  statusEl.className = 'status-value status-clear';
+  statusEl.innerHTML = '✓ Nenhum pedido pendente';
+  document.getElementById('pendingOrders').style.display = 'none';
+}
+
+function confirmPayment() {
+  try {
+    window.fbSet('payment_confirmed', 'yes');
+    window.fbSet('pending_order', 'none');
+    document.getElementById('confirmBtn').disabled = true;
+    document.getElementById('confirmedMsg').style.display = 'block';
+    document.getElementById('pendingOrders').style.display = 'none';
+    const statusEl = document.getElementById('statusValue');
+    statusEl.className = 'status-value status-clear';
+    statusEl.innerHTML = '✓ Confirmado!';
+  } catch(e) {
+    alert('Erro ao confirmar. Tente novamente.');
+  }
+}
+
+document.getElementById('loginInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+</script>
+</body>
+</html>
